@@ -52,7 +52,7 @@ class ActivityMain : ListActivity() {
 
     private fun addItem(data: ArrayList<Map<String, Any>>, label: String?,
                         activityIntent: Intent, description: CharSequence?) {
-        var temp = hashMapOf<String, Any>()
+        val temp = hashMapOf<String, Any>()
         temp["title"] = label!!
         if (description != null) {
             temp.put("description", description)
@@ -72,7 +72,7 @@ class ActivityMain : ListActivity() {
     }
 
     override fun onListItemClick(l: ListView?, v: View?, position: Int, id: Long) {
-        val map: Map<*, *> = l?.getItemAtPosition(position) as Map<*, *>
+        val map =l?.getItemAtPosition(position) as Map<*, *>
         startActivity(map["intent"] as Intent?)
     }
 }

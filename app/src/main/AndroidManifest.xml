@@ -2,11 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.wujie.android.voicedemo">
 
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -15,9 +15,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
-        <!-- 不使用识别UI 对话框时 ，可以删除SimpleTransApplication-->
-
+        <!-- 不使用识别UI 对话框时 ，可以删除SimpleTransApplication -->
         <!--
             离线功能即离线命令词及唤醒词功能开启需要正式授权，正式授权完全由SDK自动管理：
             1. 在百度语音开放平台注册应用，http://yuyin.baidu.com/app
@@ -30,7 +28,7 @@
         再次重复！！填写APP_ID 时请检查在官网的该应用内是否设置了正确包名。否则会导致唤醒词及离线功能无法使用。
          本demo的包名是com.baidu.speech.recognizerdemo，在build.gradle文件中查看。
          如果遇见“app name unknown"的错误， 极可能为包名设置错误
-          -->
+        -->
         <!-- 正式发布时，请替换成您自己的appId 本demo的appId会不定时下线 -->
         <meta-data
             android:name="com.baidu.speech.APP_ID"
@@ -46,7 +44,8 @@
             android:name="com.baidu.speech.VoiceRecognitionService"
             android:exported="false" />
 
-        <activity android:name=".activity.ActivityMain"
+        <activity
+            android:name=".activity.ActivityMain"
             android:configChanges="orientation|keyboardHidden|screenLayout"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.DeviceDefault.Light">
@@ -55,5 +54,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".activity.ActivityCommon"></activity>
     </application>
 </manifest>

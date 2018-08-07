@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">audio_speech_baidu</string>
+    <string name="setting">设置</string>
+    <string name="start">开始</string>
 </resources>
