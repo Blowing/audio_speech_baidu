@@ -48,6 +48,4 @@
         android:id="@+id/btn"
         android:layout_alignParentBottom="true" />
 
-
-
 </LinearLayout>

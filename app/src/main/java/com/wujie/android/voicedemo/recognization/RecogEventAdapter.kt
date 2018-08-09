@@ -59,7 +59,7 @@ class RecogEventAdapter(private val listener: IRecogListener) : EventListener{
                 if (data?.size != length) {
                     Logger.error(TAG, "internal error: asr.audio callback data length is not equal to length param")
                 }
-                listener.onAsrAudio(data, offset, length)
+                listener.onAsrAudio(data, offset, length )
             }
 
         }
