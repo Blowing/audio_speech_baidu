@@ -5,12 +5,13 @@ import org.json.JSONObject
 
 /**
  * Created by wujie on 2018/8/7/007.
+ *
  */
 class RecogResult {
     companion object {
         private val ERROR_NONE: Int = 0
 
-        fun parseJson(jsonStr: String): RecogResult {
+        fun parseJson(jsonStr: String?): RecogResult {
             var result = RecogResult()
             try {
                 val json = JSONObject(jsonStr)
