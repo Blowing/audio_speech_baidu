@@ -15,6 +15,26 @@ import org.json.JSONObject
 class OfflineRecogParams(context: Activity) : CommonRecogParams(context) {
     companion object {
         val TAG = "OfflineRecogParams"
+        fun fetchOfflineParams(): Map<String, Any> {
+            val map = java.util.HashMap<String, Any>()
+            map[SpeechConstant.DECODER] = 2
+            map[SpeechConstant.ASR_OFFLINE_ENGINE_GRAMMER_FILE_PATH] = "assets:///baidu_speech_grammar.bsg"
+            map.putAll(fetchSlotDataParam())
+            return map
+        }
+
+        fun fetchSlotDataParam(): Map<String, Any> {
+            val map = java.util.HashMap<String, Any>()
+            try {
+                val json = JSONObject()
+                json.put("name", JSONArray().put("妈妈").put("老伍"))
+                        .put("appname", JSONArray().put("手百").put("度秘"))
+                map[SpeechConstant.SLOT_DATA] = json
+            } catch (e: JSONException) {
+                e.printStackTrace()
+            }
+            return map
+        }
     }
 
     override fun fetch(sp: SharedPreferences): Map<String, Any> {
@@ -24,26 +44,9 @@ class OfflineRecogParams(context: Activity) : CommonRecogParams(context) {
         return map
     }
 
-    fun fetchOfflineParams(): Map<String, Any> {
-        val map = java.util.HashMap<String, Any>()
-        map[SpeechConstant.DECODER] = 2
-        map[SpeechConstant.ASR_OFFLINE_ENGINE_GRAMMER_FILE_PATH] = "assets:///baidu_speech_grammar.bsg"
-        map.putAll(fetchSlotDataParam())
-        return map
-    }
 
-    fun fetchSlotDataParam(): Map<String, Any> {
-        val map = java.util.HashMap<String, Any>()
-        try {
-            val json = JSONObject()
-            json.put("name", JSONArray().put("妈妈").put("老伍"))
-                    .put("appname", JSONArray().put("手百").put("度秘"))
-            map[SpeechConstant.SLOT_DATA] = json
-        } catch (e: JSONException) {
-            e.printStackTrace()
-        }
-        return map
-    }
+
+
 
 }
 
