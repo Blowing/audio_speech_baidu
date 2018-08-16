@@ -10,9 +10,10 @@ import com.wujie.android.voicedemo.recognization.IStatus
  */
 class RecogWakeupListener(private val handler: Handler) : SimpleWakeupListener(), IStatus {
 
-    override fun onSuccess(word: String, result: WakeUpResult) {
+
+    override fun onSuccess(word: String?, result: WakeUpResult) {
         super.onSuccess(word, result)
-        handler?.sendMessage(handler?.obtainMessage(IStatus.STATUS_WAKEUP_SUCCESS))
+        handler.sendMessage(handler.obtainMessage(IStatus.STATUS_WAKEUP_SUCCESS))
     }
 
     companion object {
