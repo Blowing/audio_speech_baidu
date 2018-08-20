@@ -14,7 +14,7 @@ import org.json.JSONObject
  * Created by wujie on 2018/8/7/007.
  *
  */
-class MyRecognizer(context: Context, private var eventListener: EventListener) {
+class MyRecognizer(context: Context, private var eventListener: EventListener ?= null) {
 
     private var asr: EventManager? = null
 
@@ -24,7 +24,7 @@ class MyRecognizer(context: Context, private var eventListener: EventListener) {
         private val TAG = "MyRecognizer"
     }
 
-    constructor(context: Context, recogListener: IRecogListener) : this(context, RecogEventAdapter(recogListener)) {}
+    constructor(context: Context, recogListener: IRecogListener) : this(context, RecogEventAdapter(recogListener))
 
     init {
         if (isInited) {

@@ -54,13 +54,13 @@ abstract class ActivityCommon : AppCompatActivity() {
 
     abstract fun initRecog()
 
-    private fun handleMsg(msg: Message?) {
+    open fun handleMsg(msg: Message?) {
         txtLog?.append(msg?.obj.toString() + "\n")
     }
 
 
     @SuppressLint("SetTextI18n")
-    private fun initView() {
+     open fun initView() {
         txtResult = findViewById(R.id.txtResult)
         txtLog = findViewById(R.id.txtLog)
 
