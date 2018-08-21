@@ -1,5 +1,6 @@
 package com.wujie.android.voicedemo.activity
 
+import com.wujie.android.voicedemo.activity.setting.NluSetting
 import com.wujie.android.voicedemo.recognization.CommonRecogParams
 import com.wujie.android.voicedemo.recognization.nlu.NluRecogParams
 
@@ -21,9 +22,8 @@ class ActivityNlu : ActivityRecog(){
         enableOffline = true // 请确认不使用离线命令词功能后，改为false
     }
 
-    constructor() {
-        super()
-        settingActivityClass = NluSetting.class
+    init {
+        settingActivityClass = NluSetting::class.java
     }
 
     override fun getApiParams(): CommonRecogParams {

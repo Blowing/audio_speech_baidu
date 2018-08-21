@@ -5,6 +5,7 @@ import android.preference.*
 
 /**
  * Created by wujie on 2018/8/16/016.
+ *
  */
 abstract class CommonSetting : PreferenceActivity(), Preference.OnPreferenceChangeListener {
 
