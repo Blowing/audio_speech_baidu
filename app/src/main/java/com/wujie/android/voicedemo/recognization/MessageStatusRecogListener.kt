@@ -6,6 +6,7 @@ import android.util.Log
 
 /**
  * Created by wujie on 2018/8/9/009.
+ *
  */
 class MessageStatusRecogListener(private val handler: Handler?): StatusRecogListener(){
 
@@ -35,8 +36,8 @@ class MessageStatusRecogListener(private val handler: Handler?): StatusRecogList
     }
 
     override fun onAsrPartialResult(results: Array<String?>?, recogResult: RecogResult) {
-        super.onAsrPartialResult(results, recogResult)
         sendStatusMessage("临时识别结果，结果是"+ (results?.get(0) ?: "") + "原始json:${recogResult.origalJson}")
+        super.onAsrPartialResult(results, recogResult)
 
     }
 

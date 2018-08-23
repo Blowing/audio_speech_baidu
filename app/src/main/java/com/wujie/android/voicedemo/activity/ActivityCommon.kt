@@ -64,6 +64,7 @@ abstract class ActivityCommon : AppCompatActivity() {
         txtResult = findViewById(R.id.txtResult)
         txtLog = findViewById(R.id.txtLog)
 
+        btn = findViewById(R.id.btn)
         txtLog?.text = "${this.descText}\n"
         setting = findViewById(R.id.setting)
 

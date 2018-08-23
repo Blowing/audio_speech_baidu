@@ -1,16 +1,14 @@
 package com.wujie.android.voicedemo.ui
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.ColorFilter
-import android.graphics.Paint
+import android.graphics.*
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.View
 
 /**
- * Created by wujie on 2018/8/20/020.
+ * Created by wujie
+ * on 2018/8/20/020.
  */
 class SDKAnimationView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
@@ -161,7 +159,7 @@ class SDKAnimationView(context: Context, attrs: AttributeSet) : View(context, at
         setThemeStyle(BaiduASRDialogTheme.THEME_BLUE_LIGHTBG)
     }
 
-    private fun setThemeStyle(themeStyle: Int) {
+     fun setThemeStyle(themeStyle: Int) {
         val isDeepStyle = BaiduASRDialogTheme.isDeepStyle(themeStyle)
 
         mBgColor = if (isDeepStyle) -0xe2e2e3 else -0x9090a
@@ -197,17 +195,347 @@ class SDKAnimationView(context: Context, attrs: AttributeSet) : View(context, at
     }
 
 
-    private val mRecordingUpdateTask = object : Runnable {
+    fun startPreparingAnimation() {
+        mAnimationState = PREPARING_ANIMATION_STATE
+        mPreparingBeginTime = System.currentTimeMillis()
+        removeCallbacks(mInvalidateTask)
+        removeCallbacks(mRecordingUpdateTask)
+        post(mInvalidateTask)
+    }
+
+    fun startRecordingAnimation() {
+        mAnimationState = RECORDING_ANIMATION_STATE
+
+        removeCallbacks(mInvalidateTask)
+        removeCallbacks(mRecordingUpdateTask)
+
+        post(mInvalidateTask)
+        post(mRecordingUpdateTask)
+    }
+
+    fun startRecognizingAnimation() {
+        mAnimationState = RECORDING_ANIMATION_STATE
+        mRecognizingBeginTime = System.currentTimeMillis()
+
+        mRecognizingWaveIndex = 0
+        mRecognizingRefreshCount = 0
+
+        removeCallbacks(mInvalidateTask)
+        removeCallbacks(mRecordingUpdateTask)
+        post(mInvalidateTask)
+    }
+
+    fun resetAnimation() {
+        mAnimationState = NO_ANIMATION_STATE
+        removeCallbacks(mInvalidateTask)
+        removeCallbacks(mRecordingUpdateTask)
+    }
+
+    private fun setVolumeLevel(level: Int) {
+        if (volumes != null && level >= 0 && level < volumes!!.size) {
+            currentVolumeArray = targetVolumeArray
+            mRecordingInterpolationTime = System.currentTimeMillis()
+
+            volumes = when ((2*Math.random()).toInt()) {
+                0-> VOLUMES_GROUP1
+                1-> VOLUMES_GROUP2
+                2-> VOLUMES_GROUP3
+                else -> VOLUMES_GROUP1
+            }
+            targetVolumeArray = volumes!![level]
+        }
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        mWidth = MeasureSpec.getSize(widthMeasureSpec)
+        sampleSideLength =  mWidth.toDouble() / RECT_IN_ROW.toDouble()
+        setMeasuredDimension(mWidth, (sampleSideLength * RECT_IN_COLUMN).toInt())
+    }
+
+    fun setHsvFilter(filter: ColorFilter) {
+        mHsvFilter = filter
+    }
+
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        mHsvFilterBitmap = Bitmap.createBitmap(w,h, Bitmap.Config.ARGB_8888)
+        mHsvFilterCanvas = Canvas(mHsvFilterBitmap)
+        mHsvFilterPaint = Paint()
+        mHsvFilterPaint!!.colorFilter = mHsvFilter
+    }
+
+    override fun onDraw(canvas: Canvas?) {
+        super.onDraw(canvas)
+        realOnDraw(mHsvFilterCanvas!!)
+        canvas?.drawBitmap(mHsvFilterBitmap, 0f, 0f, mHsvFilterPaint)
+    }
+
+    protected fun realOnDraw(canvas: Canvas) {
+        canvas.drawColor(mBgColor)
+        when (mAnimationState) {
+            INITIALIZING_ANIMATION_STATE -> {
+                currentVolumeArray = INIT_VOLUME_ARRAY
+                targetVolumeArray = INIT_VOLUME_ARRAY
+                val timeInterval : Long = System.currentTimeMillis() - mPreparingBeginTime
+                var alpha = if (timeInterval < PREPARING_BAIDU_LOGO_TIME) {
+                    // logo出现阶段动画
+                    val duration = ((System.currentTimeMillis() - mPreparingBeginTime) % PREPARING_BAIDU_LOGO_TIME).toInt()
+                    (duration.toDouble() / PREPARING_BAIDU_LOGO_TIME * 0xFF).toInt()
+                } else {
+                    // logo闪烁阶段动画
+                    val duration = (timeInterval % PREPARING_BAIDU_LOGO_TIME).toInt()
+                    if (duration < PREPARING_BAIDU_LOGO_TIME / 2) {
+                        ((1 - duration.toDouble() / (PREPARING_BAIDU_LOGO_TIME / 2) * 0.8f) * 0xFF).toInt()
+                    } else {
+                        ((1 - (PREPARING_BAIDU_LOGO_TIME - duration).toDouble() / (PREPARING_BAIDU_LOGO_TIME / 2) * 0.8f) * 0xFF).toInt()
+                    }
+                }
+                drawBaiduLogo(canvas, alpha)
+            }
+            PREPARING_ANIMATION_STATE -> {
+                currentVolumeArray = PREPARING_VOLUME_ARRAY
+                targetVolumeArray = PREPARING_VOLUME_ARRAY
+
+                val timeInterval = System.currentTimeMillis() - mPreparingBeginTime
+
+                val alpha =if (timeInterval < PREPARING_BAIDU_LOGO_TIME) {
+                    // logo出现阶段动画
+                    val duration = ((System.currentTimeMillis() - mPreparingBeginTime) % PREPARING_BAIDU_LOGO_TIME).toInt()
+                    (duration.toDouble() / PREPARING_BAIDU_LOGO_TIME * 0xFF).toInt()
+                } else {
+                    // logo闪烁阶段动画
+                    val duration = (timeInterval % PREPARING_BAIDU_LOGO_TIME).toInt()
+                    if (duration < PREPARING_BAIDU_LOGO_TIME / 2) {
+                        ((1 - duration.toDouble() / (PREPARING_BAIDU_LOGO_TIME / 2) * 0.8f) * 0xFF).toInt()
+                    } else {
+                        ((1 - (PREPARING_BAIDU_LOGO_TIME - duration).toDouble() / (PREPARING_BAIDU_LOGO_TIME / 2) * 0.8f) * 0xFF).toInt()
+                    }
+                }
+
+                drawVoiceVolumn(canvas, alpha)
+                drawBaiduLogo(canvas, alpha)
+            }
+
+            RECORDING_ANIMATION_STATE -> {
+                mRecordingCurrentTime = System.currentTimeMillis()
+                drawVoiceVolumn(canvas, 0xFF)
+                drawBaiduLogo(canvas, 0xFF)
+            }
+
+            RECOGNIZING_ANIMATION_STATE -> {
+                if (System.currentTimeMillis() - mRecognizingBeginTime > RECOGNIZING_WAVE_TRANSLATION_TIME) {
+                    mRecognizingBeginTime = System.currentTimeMillis()
+
+                    if (mRecognizingRefreshCount == 0) {
+                        mRecognizingWaveIndex++
+                        if (mRecognizingWaveIndex >= RECT_IN_COLUMN + 5) {
+                            mRecognizingRefreshCount = 1
+                        }
+                    } else {
+                        mRecognizingWaveIndex--
+                        if (mRecognizingWaveIndex <= -5) {
+                            mRecognizingRefreshCount = 0
+                        }
+                    }
+                }
+
+                drawRecognizingLine(canvas)
+                drawRecognizingBaiduLogo(canvas)
+            }
+        }
+        drawGridding(canvas)
+        drawMask(canvas)
+    }
+
+    private fun drawRecognizingBaiduLogo(canvas: Canvas) {
+        mBaiduLogePaint?.alpha = 0xFF
+        mLogoReversePaint?.alpha = 0xFF
+        for (i in BEGIN_LOC_X until BEGIN_LOC_X + BAIDU_LOGO.size) {
+            for (j in 0 until RECT_IN_COLUMN) {
+                if (BAIDU_LOGO[i - BEGIN_LOC_X] shr j and 0x01 == 0x01) {
+                    val volume = mRecognizingWaveIndex
+                    if (j < volume) {
+                        if (j < volume - 1) {
+                            canvas.drawRect((sampleSideLength * (i - 1)).toInt().toFloat(),
+                                    (sampleSideLength * (RECT_IN_COLUMN - j - 1)).toInt().toFloat(),
+                                    (sampleSideLength * i).toInt().toFloat(),
+                                    (sampleSideLength * (RECT_IN_COLUMN - j)).toInt().toFloat(),
+                                    mLogoReversePaint)
+                        }
+                    } else {
+                        canvas.drawRect((sampleSideLength * (i - 1)).toInt().toFloat(),
+                                (sampleSideLength * (RECT_IN_COLUMN - j - 1)).toInt().toFloat(),
+                                (sampleSideLength * i).toInt().toFloat(),
+                                (sampleSideLength * (RECT_IN_COLUMN - j)).toInt().toFloat(),
+                                mBaiduLogePaint)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun drawGridding(canvas: Canvas) {
+        for (col in 0..RECT_IN_COLUMN) {
+            canvas.drawLine(0f, (sampleSideLength * col).toInt().toFloat(), mWidth.toFloat(),
+                    (sampleSideLength * col).toInt().toFloat(), mGriddingPaint)
+        }
+
+        for (row in 0..RECT_IN_ROW) {
+            canvas.drawLine((sampleSideLength * row).toInt().toFloat(), 0f, (sampleSideLength * row).toInt().toFloat(),
+                    height.toFloat(), mGriddingPaint)
+        }
+    }
+
+    private fun drawMask(canvas: Canvas) {
+            mMask!!.setBounds(0, 0, mWidth, height)
+            mMask!!.draw(canvas)
+    }
+
+    private fun drawVoiceVolumn(canvas: Canvas, alpha: Int) {
+
+        val gradient = LinearGradient(0f, 1f, 0f, (height * 2 / 3).toFloat(), mVolumeShadowColor1, mVolumeShadowColor2,
+                Shader.TileMode.CLAMP)
+        mVolumnShadowPaint?.shader = gradient
+        mVolumnShadowPaint?.alpha = alpha
+
+        for (i in 0 until RECT_IN_ROW) {
+            var volume = 0
+            var intervalTime = (mRecordingCurrentTime - mRecordingInterpolationTime).toInt()
+            if (intervalTime > SAMPE_RATE_VOLUME) {
+                intervalTime = SAMPE_RATE_VOLUME
+            }
+
+            volume = (currentVolumeArray[i] + (targetVolumeArray[i] - currentVolumeArray[i]) * intervalTime.toDouble() / SAMPE_RATE_VOLUME).toInt()
+
+            canvas.save()
+            canvas.translate((sampleSideLength * i).toInt().toFloat(),
+                    (sampleSideLength * (RECT_IN_COLUMN - volume)).toInt().toFloat())
+            canvas.drawRect(0f, 0f, sampleSideLength.toInt().toFloat(), (height - (sampleSideLength * (RECT_IN_COLUMN - volume)).toInt()).toFloat(), mVolumnShadowPaint)
+            canvas.restore()
+
+            val a = ((mVolumeCeilingColor1 shr 24 and 0xFF) + ((mVolumeCeilingColor2 shr 24 and 0xFF) - (mVolumeCeilingColor1 shr 24 and 0xFF)) * (Math.abs(i - RECT_IN_ROW / 2.toDouble()) / (RECT_IN_ROW / 2.toDouble()))).toInt()
+
+            val r = ((mVolumeCeilingColor1 shr 16 and 0xFF) + ((mVolumeCeilingColor2 shr 16 and 0xFF) - (mVolumeCeilingColor1 shr 16 and 0xFF)) * (Math.abs(i - RECT_IN_ROW / 2.toDouble()) / (RECT_IN_ROW / 2.toDouble()))).toInt()
+            val g = ((mVolumeCeilingColor1 shr 8 and 0xFF) + ((mVolumeCeilingColor2 shr 8 and 0xFF) - (mVolumeCeilingColor1 shr 8 and 0xFF)) * (Math.abs(i - RECT_IN_ROW / 2.toDouble()) / (RECT_IN_ROW / 2.toDouble()))).toInt()
+            val b = ((mVolumeCeilingColor1 and 0xFF) + ((mVolumeCeilingColor2 and 0xFF) - (mVolumeCeilingColor1 and 0xFF)) * (Math.abs(i - RECT_IN_ROW / 2.toDouble()) / (RECT_IN_ROW / 2.toDouble()))).toInt()
+
+            val color = a shl 24 or (r and 0xFF shl 16) or (g and 0xFF shl 8) or (b and 0xFF)
+            mVolumnCeilingPaint?.color = color
+            mVolumnCeilingPaint?.alpha = (alpha.toDouble() * a / 0xFF).toInt()
+            canvas.drawRect((sampleSideLength * i).toInt().toFloat(),
+                    (sampleSideLength * (RECT_IN_COLUMN - volume)).toInt().toFloat(),
+                    (sampleSideLength * (i + 1)).toInt().toFloat(),
+                    (sampleSideLength * (RECT_IN_COLUMN - volume + 1)).toInt().toFloat(), mVolumnCeilingPaint)
+        }
+    }
+
+    private fun drawBaiduLogo(canvas: Canvas, alpha: Int) {
+        mBaiduLogePaint?.alpha = alpha
+        mLogoReversePaint?.alpha = alpha
+        for (i in BEGIN_LOC_X until BEGIN_LOC_X + BAIDU_LOGO.size) {
+            for (j in 0 until RECT_IN_COLUMN) {
+                if (BAIDU_LOGO[i - BEGIN_LOC_X] shr j and 0x01 == 0x01) {
+                    var volume = 0
+                    var intervalTime = (mRecordingCurrentTime - mRecordingInterpolationTime).toInt()
+                    if (intervalTime > SAMPE_RATE_VOLUME) {
+                        intervalTime = SAMPE_RATE_VOLUME
+                    }
+
+                    // 均匀插值计算过渡位置
+                    volume = (currentVolumeArray[i - 1] + (targetVolumeArray[i - 1] - currentVolumeArray[i - 1]) * intervalTime.toDouble() / SAMPE_RATE_VOLUME).toInt()
+
+                    if (j < volume) {
+                        // baidu logo部分进行反色处理。
+                        if (j < volume - 1) {
+                            canvas.drawRect((sampleSideLength * (i - 1)).toInt().toFloat(),
+                                    (sampleSideLength * (RECT_IN_COLUMN - j - 1)).toInt().toFloat(),
+                                    (sampleSideLength * i).toInt().toFloat(),
+                                    (sampleSideLength * (RECT_IN_COLUMN - j)).toInt().toFloat(),
+                                    mLogoReversePaint)
+                        }
+                    } else {
+                        canvas.drawRect((sampleSideLength * (i - 1)).toInt().toFloat(),
+                                (sampleSideLength * (RECT_IN_COLUMN - j - 1)).toInt().toFloat(),
+                                (sampleSideLength * i).toInt().toFloat(),
+                                (sampleSideLength * (RECT_IN_COLUMN - j)).toInt().toFloat(),
+                                mBaiduLogePaint)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun drawRecognizingLine(canvas: Canvas) {
+        if (mRecognizingRefreshCount == 0) {
+            val gradient = LinearGradient(0f, 1f, 0f,
+                    (RECOGNIZING_SCANLINE_SHADOW_NUMBER * sampleSideLength).toInt().toFloat(),
+                    mRecognizingLineShadowColor1,
+                    mRecognizingLineShadowColor2,
+                    Shader.TileMode.MIRROR)
+            mVolumnShadowPaint?.shader = gradient
+
+            canvas.save()
+            canvas.translate(0f,
+                    (sampleSideLength * (RECT_IN_COLUMN - (mRecognizingWaveIndex - 1))).toInt().toFloat())
+            canvas.drawRect(0f, 0f, mWidth.toFloat(), (sampleSideLength * RECOGNIZING_SCANLINE_SHADOW_NUMBER).toInt().toFloat(),
+                    mVolumnShadowPaint)
+            canvas.restore()
+        } else {
+            val gradient = LinearGradient(0f, 1f, 0f,
+                    (RECOGNIZING_SCANLINE_SHADOW_NUMBER * sampleSideLength).toInt().toFloat(),
+                    mRecognizingLineShadowColor2,
+                    mRecognizingLineShadowColor1,
+                    Shader.TileMode.MIRROR)
+            mVolumnShadowPaint?.shader = gradient
+
+            canvas.save()
+            canvas.translate(0f, (sampleSideLength * (RECT_IN_COLUMN - (mRecognizingWaveIndex + RECOGNIZING_SCANLINE_SHADOW_NUMBER))).toInt().toFloat())
+            canvas.drawRect(0f, 0f, mWidth.toFloat(),
+                    (RECOGNIZING_SCANLINE_SHADOW_NUMBER * sampleSideLength).toInt().toFloat(),
+                    mVolumnShadowPaint)
+            canvas.restore()
+        }
+
+        for (i in 0 until RECT_IN_ROW) {
+            // 手工计算颜色渐变
+            val alpha = ((mVolumeCeilingColor1 shr 24 and 0xFF) + ((mVolumeCeilingColor2 shr 24 and 0xFF) - (mVolumeCeilingColor1 shr 24 and 0xFF)) * (Math.abs(i - RECT_IN_ROW / 2.toDouble()) / (RECT_IN_ROW / 2.toDouble()))).toInt()
+            val r = ((mVolumeCeilingColor1 shr 16 and 0xFF) + ((mVolumeCeilingColor2 shr 16 and 0xFF) - (mVolumeCeilingColor1 shr 16 and 0xFF)) * (Math.abs(i - RECT_IN_ROW / 2.toDouble()) / (RECT_IN_ROW / 2.toDouble()))).toInt()
+            val g = ((mVolumeCeilingColor1 shr 8 and 0xFF) + ((mVolumeCeilingColor2 shr 8 and 0xFF) - (mVolumeCeilingColor1 shr 8 and 0xFF)) * (Math.abs(i - RECT_IN_ROW / 2.toDouble()) / (RECT_IN_ROW / 2.toDouble()))).toInt()
+            val b = ((mVolumeCeilingColor1 and 0xFF) + ((mVolumeCeilingColor2 and 0xFF) - (mVolumeCeilingColor1 and 0xFF)) * (Math.abs(i - RECT_IN_ROW / 2.toDouble()) / (RECT_IN_ROW / 2.toDouble()))).toInt()
+
+            val color = alpha shl 24 or (r and 0xFF shl 16) or (g and 0xFF shl 8) or (b and 0xFF)
+            mVolumnCeilingPaint?.color = color
+            canvas.drawRect((sampleSideLength * i).toInt().toFloat(),
+                    (sampleSideLength * (RECT_IN_COLUMN - mRecognizingWaveIndex)).toInt().toFloat(),
+                    (sampleSideLength * (i + 1)).toInt().toFloat(), (sampleSideLength * (RECT_IN_COLUMN - mRecognizingWaveIndex + 1)).toInt().toFloat(), mVolumnCeilingPaint)
+        }
+    }
+
+    fun startVoiceAnimation(state: Int) {
+
+        when (state) {
+            NO_ANIMATION_STATE -> resetAnimation()
+            PREPARING_ANIMATION_STATE -> startPreparingAnimation()
+            RECORDING_ANIMATION_STATE -> startRecordingAnimation()
+            RECOGNIZING_ANIMATION_STATE -> startRecognizingAnimation()
+            INITIALIZING_ANIMATION_STATE -> startInitializingAnimation()
+            else -> resetAnimation()
+        }
+    }
+
+    private val mRecordingUpdateTask = object :Runnable {
         override fun run() {
             val minBar = 0
             val maxBar = 6
             var bar = minBar
             bar += ((maxBar - minBar) * getCurrentDBLevelMeter() / 100).toInt()
 
-            if (bar > mCurrentBar) {
-                mCurrentBar = bar
+            mCurrentBar = if (bar > mCurrentBar) {
+                bar
             } else {
-                mCurrentBar = Math.max(bar, mCurrentBar - BAR_DROPOFF_STEP)
+                Math.max(bar, mCurrentBar - BAR_DROPOFF_STEP)
             }
 
             mCurrentBar = Math.min(maxBar, mCurrentBar)
@@ -217,9 +545,20 @@ class SDKAnimationView(context: Context, attrs: AttributeSet) : View(context, at
                 mCurrentBar = 1
             }
             setVolumeLevel(mCurrentBar)
-            removeCallbacks(mRecordingUpdateTask)
-            postDelayed(mRecordingUpdateTask, SAMPE_RATE_VOLUME.toLong())
+            removeCallbacks(this)
+            postDelayed(this, SAMPE_RATE_VOLUME.toLong())
+
         }
+
+    }
+
+
+    private fun getCurrentDBLevelMeter(): Float {
+        return mCurrentDBLevelMeter
+    }
+
+    fun setCurrentDBLevelMeter(rmsDb: Float) {
+        mCurrentDBLevelMeter = rmsDb
     }
 
     private val mInvalidateTask = object : Runnable {

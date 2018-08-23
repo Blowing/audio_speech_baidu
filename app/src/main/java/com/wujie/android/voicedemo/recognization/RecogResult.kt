@@ -13,6 +13,7 @@ class RecogResult {
 
         fun parseJson(jsonStr: String?): RecogResult {
             var result = RecogResult()
+            result.origalJson = jsonStr
             try {
                 val json = JSONObject(jsonStr)
                 val error = json.optInt("error")

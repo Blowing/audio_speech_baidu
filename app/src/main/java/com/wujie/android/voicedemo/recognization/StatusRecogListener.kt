@@ -4,6 +4,7 @@ import android.util.Log
 
 /**
  * Created by wujie on 2018/8/9/009.
+ *
  */
 open class StatusRecogListener : IRecogListener, IStatus {
     companion object {
@@ -25,7 +26,6 @@ open class StatusRecogListener : IRecogListener, IStatus {
     }
 
     override fun onAsrPartialResult(results: Array<String?>?, recogResult: RecogResult) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun onAsrFinalResult(results: Array<String?>?, recogResult: RecogResult) {
@@ -50,12 +50,10 @@ open class StatusRecogListener : IRecogListener, IStatus {
     }
 
     override fun onAsrAudio(data: ByteArray?, offset: Int, length: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun onAsrExit() {
         Status = IStatus.STATUS_NONE
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun onAsrOnlineNluResult(nluResult: String) {

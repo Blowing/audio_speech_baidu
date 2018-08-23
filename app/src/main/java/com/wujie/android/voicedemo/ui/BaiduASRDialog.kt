@@ -35,7 +35,7 @@ abstract class BaiduASRDialog : Activity() {
     @Volatile
     private var mIsRunning = false
 
-    private var mPrompt: String = ""
+     var mPrompt: String = ""
 
     protected var status = STATUS_None
 
@@ -120,7 +120,6 @@ abstract class BaiduASRDialog : Activity() {
         override fun onAsrEnd() {
             status = STATUS_Recognition
             onEndOfSpeech()
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
         override fun onAsrPartialResult(results: Array<String?>?, recogResult: RecogResult) {
@@ -161,19 +160,15 @@ abstract class BaiduASRDialog : Activity() {
         }
 
         override fun onAsrExit() {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
         override fun onAsrOnlineNluResult(nluResult: String) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
         override fun onOfflineLoaded() {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
         override fun onOfflineUnLoaded() {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
     }
